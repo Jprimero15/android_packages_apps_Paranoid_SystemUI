@@ -44,7 +44,6 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
     private static final String SETTING_USER_PREF_DATA_SUB = "user_preferred_data_sub";
     private final SubscriptionManager mSubscriptionManager;
     private final TelephonyManager mTelephonyManager;
-    private String mInactiveSlotName;
 
     BroadcastReceiver mSimReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -190,6 +189,7 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
                         activeSIMZero ? R.string.qs_data_switch_text_2
                                 : R.string.qs_data_switch_text_1);
                 state.value = true;
+                state.secondaryLabel = getInactiveSlotName();
                 break;
             default:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_data_switch_1);
@@ -211,8 +211,6 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
         state.contentDescription = mContext.getString(
                 activeSIMZero ? R.string.qs_data_switch_changed_2
                         : R.string.qs_data_switch_changed_1);
-        if (mInactiveSlotName != null) {
-            state.secondaryLabel = mInactiveSlotName;
     }
 
     @Override
@@ -240,11 +238,27 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
                     // Indicate we found sim with active data, disable data on remaining sim.
                     if (!foundActive) foundActive = !dataEnabled;
                 }
-                // Store carrier label of inactive/opposite sim slot.
-                if (!foundActive) mInactiveSlotName = subInfo.getDisplayName().toString();
                 Log.d(TAG, "Changed subID " + subInfo.getSubscriptionId() + " to "
                     + !dataEnabled);
             }
         }
+    }
+
+    private String getInactiveSlotName() {
+        TelephonyManager telephonyManager;
+        String mInitialState = mContext.getString(R.string.tile_unavailable);
+        List<SubscriptionInfo> subInfoList =
+                mSubscriptionManager.getActiveSubscriptionInfoList(true);
+        if (subInfoList != null) {
+            for (SubscriptionInfo subInfo : subInfoList) {
+                telephonyManager =
+                        mTelephonyManager.createForSubscriptionId(subInfo.getSubscriptionId());
+                if (!telephonyManager.getDataEnabled()) {
+                    // Inactive SIM found
+                    return subInfo.getDisplayName().toString();
+                }
+            }
+        }
+        return mInitialState;
     }
 }
