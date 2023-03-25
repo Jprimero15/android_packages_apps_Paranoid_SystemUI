@@ -175,21 +175,21 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
         updateSimCount();
         switch (mSimCount) {
             case 1:
-                state.icon = ResourceIcon.get(activeSIMZero ? R.drawable.ic_qs_data_switch_2
-                        : R.drawable.ic_qs_data_switch_1);
+                state.icon = ResourceIcon.get(activeSIMZero ? R.drawable.ic_qs_data_switch_1
+                        : R.drawable.ic_qs_data_switch_2);
                 state.secondaryLabel = mContext.getString(
-                        activeSIMZero ? R.string.qs_data_switch_text_2
-                                : R.string.qs_data_switch_text_1);
+                        activeSIMZero ? R.string.qs_data_switch_text_1
+                                : R.string.qs_data_switch_text_2);
                 state.value = false;
                 break;
             case 2:
-                state.icon = ResourceIcon.get(activeSIMZero ? R.drawable.ic_qs_data_switch_2
-                        : R.drawable.ic_qs_data_switch_1);
+                state.icon = ResourceIcon.get(activeSIMZero ? R.drawable.ic_qs_data_switch_1
+                        : R.drawable.ic_qs_data_switch_2);
                 state.secondaryLabel = mContext.getString(
-                        activeSIMZero ? R.string.qs_data_switch_text_2
-                                : R.string.qs_data_switch_text_1);
+                        activeSIMZero ? R.string.qs_data_switch_text_1
+                                : R.string.qs_data_switch_text_2);
                 state.value = true;
-                state.secondaryLabel = getInactiveSlotName();
+                state.secondaryLabel = getActiveSlotName();
                 break;
             default:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_data_switch_1);
@@ -244,7 +244,7 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
         }
     }
 
-    private String getInactiveSlotName() {
+    private String getActiveSlotName() {
         TelephonyManager telephonyManager;
         String mInitialState = mContext.getString(R.string.tile_unavailable);
         List<SubscriptionInfo> subInfoList =
@@ -253,8 +253,8 @@ public class DataSwitchTile extends QSTileImpl<BooleanState> {
             for (SubscriptionInfo subInfo : subInfoList) {
                 telephonyManager =
                         mTelephonyManager.createForSubscriptionId(subInfo.getSubscriptionId());
-                if (!telephonyManager.getDataEnabled()) {
-                    // Inactive SIM found
+                if (telephonyManager.getDataEnabled()) {
+                    // Active SIM found
                     return subInfo.getDisplayName().toString();
                 }
             }
